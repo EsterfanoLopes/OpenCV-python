@@ -1,12 +1,20 @@
-FROM debian:jessie
+FROM ubuntu:18.04
+
 ENV PATH /usr/local/bin:$PATH
+
 ENV LANG C.UTF-8
+
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Sao_Paulo
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         netbase \
+        tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHON_VERSION 3.6.9
+
 RUN set -ex \
     \
     && savedAptMark="$(apt-mark showmanual)" \
@@ -72,12 +80,15 @@ RUN set -ex \
     && rm -rf /usr/src/python \
     \
     && python3 --version
+
 RUN cd /usr/local/bin \
     && ln -s idle3 idle \
     && ln -s pydoc3 pydoc \
     && ln -s python3 python \
     && ln -s python3-config python-config
+
 ENV PYTHON_PIP_VERSION 18.0
+
 RUN set -ex; \
     \
     savedAptMark="$(apt-mark showmanual)"; \
@@ -105,6 +116,7 @@ RUN set -ex; \
             \( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
         \) -exec rm -rf '{}' +; \
     rm -f get-pip.py    
+
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
         build-essential \
@@ -123,9 +135,13 @@ RUN apt-get update && \
         libavformat-dev \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
+
 RUN pip install numpy
+
 WORKDIR /
+
 ENV OPENCV_VERSION="3.4.2"
+
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip \
 && unzip ${OPENCV_VERSION}.zip \
 && mkdir /opencv-${OPENCV_VERSION}/cmake_binary \
